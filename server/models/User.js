@@ -16,7 +16,12 @@ const userSchema = new mongoose.Schema(
       sparse: true,
       unique: true,
     },
-    name: { type: String, required: true, trim: true, maxlength: 120 },
+    name: { 
+      type: String, 
+      required: true, 
+      trim: true, 
+      maxlength: 120 
+    },
     email: {
       type: String,
       required: true,
@@ -25,7 +30,11 @@ const userSchema = new mongoose.Schema(
       trim: true,
       match: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
     },
-    passwordHash: { type: String, required: true, select: false },
+    passwordHash: { 
+      type: String, 
+      required: true,
+      select: false 
+    },
     role: {
       type: String,
       enum: ["admin", "advisor", "student"],
@@ -34,9 +43,17 @@ const userSchema = new mongoose.Schema(
     },
     program: { type: String, trim: true },
     yearLevel: { type: Number, min: 1, max: 10 },
+    
+    advisorId: {
+      type: mongoose.Schema.Types.ObjectId, // linking students to their advisors
+      ref: "User",
+      default: null,
+    },
+
     active: { type: Boolean, default: true, index: true },
+    
   },
-  { timestamps: true },
+  { timestamps: true },  
 );
 
 userSchema.index({ role: 1, active: 1 });
