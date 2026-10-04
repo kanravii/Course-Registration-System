@@ -12,10 +12,8 @@ const getUsers = asyncHandler(async (req, res) => {
 
 // POST /api/users   (admin only) - create account
 const createUser = asyncHandler(async (req, res) => {
-  // fix #4: advisorId is now accepted here - without it, a student created by
-  // the admin had no advisor and the "show my advisor's email" feature on the
-  // student side would have nothing to populate.
-  const { name, email, role, studentId, advisorId, password } = req.body;
+  const { name, email, role, studentId, employeeId, program, yearLevel, advisorId, password } =
+    req.body;
 
   if (!name || !email || !role || !password) {
     return res.status(400).json({ message: "name, email, role and password are required" });
@@ -23,8 +21,10 @@ const createUser = asyncHandler(async (req, res) => {
   if (role === "student" && !studentId) {
     return res.status(400).json({ message: "studentId is required for student accounts" });
   }
+  if ((role === "admin" || role === "advisor") && !employeeId) {
+    return res.status(400).json({ message: "employeeId is required for admin/advisor accounts" });
+  }
 
-  // Light validation: if an advisorId was given, make sure it's actually an advisor.
   if (advisorId) {
     const advisor = await User.findById(advisorId);
     if (!advisor || advisor.role !== "advisor") {
@@ -38,6 +38,9 @@ const createUser = asyncHandler(async (req, res) => {
     email: email.toLowerCase(),
     role,
     studentId: role === "student" ? studentId : undefined,
+    employeeId: role !== "student" ? employeeId : undefined,
+    program: role === "student" ? program : undefined,
+    yearLevel: role === "student" ? yearLevel : undefined,
     advisorId: role === "student" ? advisorId || null : undefined,
     passwordHash,
   });
@@ -49,17 +52,13 @@ const createUser = asyncHandler(async (req, res) => {
 // PATCH /api/users/:id   (admin only)
 const updateUser = asyncHandler(async (req, res) => {
   const updates = { ...req.body };
-  delete updates.passwordHash; // never let a raw hash be set directly
+  delete updates.passwordHash;
 
-  // If the request includes a new plain-text password, hash it here.
   if (updates.password) {
     updates.passwordHash = await bcrypt.hash(updates.password, 10);
     delete updates.password;
   }
 
-  // fix #8: the "never leave the system with zero admins" rule previously only
-  // ran on DELETE. It needs to run here too, since PATCH can just as easily
-  // demote the last admin's role or deactivate them, with the same end result.
   const target = await User.findById(req.params.id);
   if (!target) return res.status(404).json({ message: "User not found" });
 
@@ -84,22 +83,7 @@ const updateUser = asyncHandler(async (req, res) => {
   res.json(user);
 });
 
-// GET /api/me   (any authenticated role) - fix #4: returns the logged-in
-// user's own profile with advisorId populated to just { name, email }, so
-// e.g. the student add/drop page can display "your advisor: Dr. X (email)"
-// without a separate round-trip request.
-const getMe = asyncHandler(async (req, res) => {
-  const user = await User.findById(req.user.id)
-    .select("-passwordHash")
-    .populate("advisorId", "name email");
-
-  if (!user) return res.status(404).json({ message: "User not found" });
-  res.json(user);
-});
-
 // DELETE /api/users/:id   (admin only)
-// Guards: an admin cannot delete themselves, and the system must never
-// be left with zero admins.
 const deleteUser = asyncHandler(async (req, res) => {
   const target = await User.findById(req.params.id);
   if (!target) return res.status(404).json({ message: "User not found" });
@@ -115,11 +99,18 @@ const deleteUser = asyncHandler(async (req, res) => {
     }
   }
 
-  // Recommended by the brief: prefer deactivating a user who already has
-  // registration history, so past records aren't orphaned. Real delete is
-  // still offered here for users with no history; adjust to your team's needs.
   await target.deleteOne();
   res.json({ message: "User deleted", id: req.params.id });
+});
+
+// GET /api/me   (any authenticated role) - own profile, advisor populated.
+const getMe = asyncHandler(async (req, res) => {
+  const user = await User.findById(req.user.id)
+    .select("-passwordHash")
+    .populate("advisorId", "name email");
+
+  if (!user) return res.status(404).json({ message: "User not found" });
+  res.json(user);
 });
 
 module.exports = { getUsers, createUser, updateUser, deleteUser, getMe };
