@@ -1,37 +1,61 @@
-// A collection for all 3 roles: student, advisor and admin
-// studentID is required and meaningful for students ONLY
-
 const mongoose = require("mongoose");
+
 const userSchema = new mongoose.Schema(
   {
-    name: { type: String, required: true, trim: true },
+    studentId: {
+      type: String,
+      trim: true,
+      uppercase: true,
+      sparse: true,
+      unique: true,
+    },
+    employeeId: {
+      type: String,
+      trim: true,
+      uppercase: true,
+      sparse: true,
+      unique: true,
+    },
+    name: { 
+      type: String, 
+      required: true, 
+      trim: true, 
+      maxlength: 120 
+    },
     email: {
       type: String,
       required: true,
       unique: true,
       lowercase: true,
       trim: true,
+      match: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
     },
-    passwordHash: { type: String, required: true }, // NEVER store plain text passwords
+    passwordHash: { 
+      type: String, 
+      required: true,
+      select: false 
+    },
     role: {
       type: String,
       enum: ["admin", "advisor", "student"],
       required: true,
+      index: true,
     },
-    studentId: {
-      type: String,
-      trim: true,
-      // required only for students - validated in the controller, not here,
-      // because admins/advisors legitimately have no studentId
-    },
+    program: { type: String, trim: true },
+    yearLevel: { type: Number, min: 1, max: 10 },
+    
     advisorId: {
       type: mongoose.Schema.Types.ObjectId, // linking students to their advisors
       ref: "User",
       default: null,
     },
-    active: { type: Boolean, default: true },
+
+    active: { type: Boolean, default: true, index: true },
+    
   },
-  { timestamps: true }
+  { timestamps: true },  
 );
+
+userSchema.index({ role: 1, active: 1 });
 
 module.exports = mongoose.model("User", userSchema);

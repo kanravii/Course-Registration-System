@@ -1,31 +1,63 @@
-// An Offering is one SECTION of a course in a specific term
-// e.g. a course might have offerings taught at different times like (section 1 in 2026/1 and section 2 in 2026/1)
-
 const mongoose = require("mongoose");
-const offeringSchema = new mongoose.Schema(
+
+const scheduleSchema = new mongoose.Schema(
   {
-    courseId: { type: mongoose.Schema.Types.ObjectId, ref: "Course", required: true },
-    term: { type: String, required: true, trim: true }, // e.g. "2026-1"
-    section: { type: Number, required: true, min: 1 },
     day: {
       type: String,
-      required: true,
       enum: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
     },
-    // Stored as "HH:MM" 24-hour strings so they are easy to compare for clashes.
-    startTime: { type: String, required: true }, // e.g. "09:00"
-    endTime: { type: String, required: true }, // e.g. "10:30"
-    room: { type: String, required: true, trim: true },
-    instructor: { type: String, required: true, trim: true },
-    seats: { type: Number, required: true, min: 0 },
-    seatsTaken: { type: Number, default: 0, min: 0 },
-    addDropOpen: { type: Boolean, default: false },
-    addDropCloseDate: { type: Date }, // shown to students when window is open
+    startTime: { type: String, match: /^([01]\d|2[0-3]):[0-5]\d$/ },
+    endTime: { type: String, match: /^([01]\d|2[0-3]):[0-5]\d$/ },
+    room: { type: String, trim: true, maxlength: 80 },
   },
-  { timestamps: true }
+  { _id: false },
 );
 
-// A given course can't have the same section number twice in the same term.
-offeringSchema.index({ courseId: 1, term: 1, section: 1 }, { unique: true });
+const offeringSchema = new mongoose.Schema(
+  {
+    course: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Course",
+      required: true,
+      index: true,
+    },
+    term: { type: String, required: true, trim: true, maxlength: 40 },
+    section: {
+      type: String,
+      required: true,
+      trim: true,
+      uppercase: true,
+      maxlength: 10,
+    },
+    instructor: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
+    capacity: { type: Number, required: true, min: 1 },
+    enrolledCount: { type: Number, default: 0, min: 0 },
+    schedule: { type: [scheduleSchema], default: [] },
+    registrationOpensAt: { type: Date, required: true },
+    registrationClosesAt: { type: Date, required: true },
+    status: {
+      type: String,
+      enum: ["draft", "open", "closed", "cancelled"],
+      default: "draft",
+      index: true,
+    },
+  },
+  { timestamps: true },
+);
+
+offeringSchema.index({ course: 1, term: 1, section: 1 }, { unique: true });
+offeringSchema.index({ term: 1, status: 1 });
+
+offeringSchema.path("enrolledCount").validate(function (value) {
+  return value <= this.capacity;
+}, "enrolledCount cannot exceed capacity");
+
+offeringSchema.path("registrationClosesAt").validate(function (value) {
+  return !this.registrationOpensAt || value > this.registrationOpensAt;
+}, "registrationClosesAt must be after registrationOpensAt");
 
 module.exports = mongoose.model("Offering", offeringSchema);
