@@ -1,5 +1,7 @@
 const mongoose = require("mongoose");
 
+// A single meeting slot (a course can meet multiple times/days per week,
+// e.g. Mon/Wed/Fri - that's why schedule is an ARRAY, not single day/time fields).
 const scheduleSchema = new mongoose.Schema(
   {
     day: {
@@ -10,30 +12,15 @@ const scheduleSchema = new mongoose.Schema(
     endTime: { type: String, match: /^([01]\d|2[0-3]):[0-5]\d$/ },
     room: { type: String, trim: true, maxlength: 80 },
   },
-  { _id: false },
+  { _id: false }
 );
 
 const offeringSchema = new mongoose.Schema(
   {
-    course: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Course",
-      required: true,
-      index: true,
-    },
+    course: { type: mongoose.Schema.Types.ObjectId, ref: "Course", required: true, index: true },
     term: { type: String, required: true, trim: true, maxlength: 40 },
-    section: {
-      type: String,
-      required: true,
-      trim: true,
-      uppercase: true,
-      maxlength: 10,
-    },
-    instructor: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-      required: true,
-    },
+    section: { type: String, required: true, trim: true, uppercase: true, maxlength: 10 },
+    instructor: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
     capacity: { type: Number, required: true, min: 1 },
     enrolledCount: { type: Number, default: 0, min: 0 },
     schedule: { type: [scheduleSchema], default: [] },
@@ -46,7 +33,7 @@ const offeringSchema = new mongoose.Schema(
       index: true,
     },
   },
-  { timestamps: true },
+  { timestamps: true }
 );
 
 offeringSchema.index({ course: 1, term: 1, section: 1 }, { unique: true });

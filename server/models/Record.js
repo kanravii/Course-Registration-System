@@ -1,33 +1,22 @@
 const mongoose = require("mongoose");
 
+// A completed (or failed/withdrawn) course attempt from a PAST term.
+// "attempt" counts retakes - attempt:1 is the first try, attempt:2 a retake, etc.
+// This is what the rules engine reads to decide "already passed" / "must retake".
 const recordSchema = new mongoose.Schema(
   {
-    student: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-      required: true,
-      index: true,
-    },
-    course: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Course",
-      required: true,
-      index: true,
-    },
-    term: { type: String, required: true, trim: true, maxlength: 40 },
+    student: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+    course: { type: mongoose.Schema.Types.ObjectId, ref: "Course", required: true },
+    term: { type: String, required: true },
     attempt: { type: Number, required: true, min: 1, default: 1 },
     grade: {
       type: String,
       required: true,
-      enum: ["A", "B", "C", "D", "F", "I", "W", "P", "NP"],
+      enum: ["A", "B+", "B", "C+", "C", "D+", "D", "F", "W"],
     },
-    credits: { type: Number, required: true, min: 1, max: 12 },
-    completedAt: { type: Date, default: Date.now },
+    credits: { type: Number, required: true, min: 0 },
   },
-  { timestamps: true },
+  { timestamps: true }
 );
-
-recordSchema.index({ student: 1, course: 1, attempt: 1 }, { unique: true });
-recordSchema.index({ student: 1, term: 1 });
 
 module.exports = mongoose.model("Record", recordSchema);
