@@ -1,9 +1,14 @@
+import Navbar from '../components/Navbar'
+
 function StudentDashboard() {
   return (
-    <main className="page">
-      <h1>StudentDashboard</h1>
-      <p>StudentDashboard form coming soon.</p>
-    </main>
+    <>
+      <Navbar title="Student Dashboard" />
+      <main className="page">
+        <h1>Student Dashboard</h1>
+        <p>Your courses and academic record coming soon.</p>
+      </main>
+    </>
   )
 }
 
