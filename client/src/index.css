@@ -15,3 +15,54 @@ h1 {
   font-size: 1.6rem;
   margin-top: 0;
 }
+
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 24px;
+  background: #1f3a5f;
+  color: #fff;
+}
+
+.navbar-right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.login-card {
+  max-width: 360px;
+  margin: 80px auto;
+  padding: 24px;
+  background: #fff;
+  border: 1px solid #d0d5dd;
+  border-radius: 6px;
+}
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 16px;
+}
+
+input {
+  padding: 8px;
+  font-size: 1rem;
+}
+
+button {
+  padding: 8px 14px;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+.error-message {
+  margin-bottom: 16px;
+  padding: 8px 12px;
+  color: #b42318;
+  background: #fef3f2;
+  border: 1px solid #fda29b;
+  border-radius: 4px;
+}
