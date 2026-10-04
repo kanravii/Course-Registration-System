@@ -36,18 +36,21 @@ async function getEligibleOfferings(studentId, term) {
   // 2. This student's completed-course history (previous terms).
   const records = await Record.find({ studentId }).lean();
 
-  // 3. This student's CURRENT registrations for this term (for clash checking).
+  // 3. This student's CURRENT registrations for this term (for clash checking
+  //    AND for detecting "already registered"). courseId is populated here too
   const currentRegs = await Registration.find({
     studentId,
     term,
     status: "registered",
-  }).populate({ path: "offeringId" });
+  }).populate({ path: "offeringId", populate: { path: "courseId" } });
 
   const currentOfferings = currentRegs
     .map((r) => r.offeringId)
     .filter(Boolean); // in case an offering was deleted
 
-  // Quick lookup: courseId(string) -> best/most-relevant past grade info
+  const currentOfferingIds = new Set(currentOfferings.map((o) => String(o._id)));
+
+  // Quick lookup: courseId(string) -> whether the student has EVER passed / failed it.
   const passedCourseIds = new Set(
     records.filter((r) => PASSING_GRADES.includes(r.grade)).map((r) => String(r.courseId))
   );
@@ -55,21 +58,47 @@ async function getEligibleOfferings(studentId, term) {
     records.filter((r) => r.grade === "F").map((r) => String(r.courseId))
   );
 
+  // Fix #5: retakeRequired must mean "failed AND never later passed" - a student
+  // who failed a course once but passed it on a retake should NOT be flagged as
+  // still needing a retake. Comparing failedCourseIds vs passedCourseIds alone
+  // isn't enough either (that can't tell WHICH attempt was more recent), so we
+  // use the term string to find whichever attempt happened last.
+  const trueRetakeRequiredCourseIds = new Set(
+    [...failedCourseIds].filter((courseId) => {
+      const attempts = records
+        .filter((r) => String(r.courseId) === courseId)
+        .sort((a, b) => a.term.localeCompare(b.term)); // oldest -> newest term
+      const latestAttempt = attempts[attempts.length - 1];
+      return latestAttempt.grade === "F"; // only a retake if the MOST RECENT attempt was a fail
+    })
+  );
+
   const results = offerings.map((off) => {
     const courseId = String(off.courseId._id);
     const seatsRemaining = off.seats - off.seatsTaken;
+    const retakeRequired = trueRetakeRequiredCourseIds.has(courseId); // fix #5
 
     let eligible = true;
     let reason = null;
-    let retakeRequired = failedCourseIds.has(courseId);
 
-    // Rule: Not already passed
-    if (passedCourseIds.has(courseId)) {
+    // Rule: Not already passed - SKIPPED ENTIRELY if a retake is genuinely required,
+    // so a retake-required course never gets excluded as "already passed" in the
+    // first place (fix #5 - no more relying on a brittle string-match override).
+    if (!retakeRequired && passedCourseIds.has(courseId)) {
       const pastGrade = records.find(
         (r) => String(r.courseId) === courseId && PASSING_GRADES.includes(r.grade)
       )?.grade;
       eligible = false;
       reason = `Already passed — grade ${pastGrade}`;
+    }
+
+    // Rule (fix #7): already registered for THIS exact section this term.
+    // Checked early so it takes priority over seats/clash messaging, since
+    // re-registering for something you already have isn't really a capacity
+    // or scheduling problem - it's just redundant.
+    if (eligible && currentOfferingIds.has(String(off._id))) {
+      eligible = false;
+      reason = "Already registered";
     }
 
     // Rule: Seats available (only check if not already excluded above)
@@ -87,16 +116,12 @@ async function getEligibleOfferings(studentId, term) {
       );
       if (clash) {
         eligible = false;
-        reason = `Clashes with ${clash.courseId ? "" : ""}Section ${clash.section} (${clash.day} ${clash.startTime}-${clash.endTime})`;
+        // fix #6: courseId is now populated on currentOfferings, so we can show
+        // the course code exactly as the brief's example does: "Clashes with
+        // CSC220 Section 2", not just a bare section number.
+        const clashCode = clash.courseId?.code || "another course";
+        reason = `Clashes with ${clashCode} Section ${clash.section} (${clash.day} ${clash.startTime}-${clash.endTime})`;
       }
-    }
-
-    // Rule: Failed courses must be retaken - this OVERRIDES the "already passed"
-    // exclusion (a student can retake a course they previously failed) and is
-    // never excluded on academic-history grounds, but still respects seats/clash.
-    if (retakeRequired && reason === "Already passed") {
-      eligible = true;
-      reason = null;
     }
 
     return {

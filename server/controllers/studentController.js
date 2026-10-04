@@ -4,6 +4,34 @@ const Registration = require("../models/Registration");
 const { getEligibleOfferings, PASSING_GRADES } = require("../utils/rulesEngine");
 const { asyncHandler } = require("../middleware/errorHandler");
 
+// GET /api/students   (advisor, admin) - fix #1: advisors couldn't see a
+// student picker before, since GET /api/users was admin-only. This is a
+// narrower, advisor-safe equivalent that only ever returns students.
+const getAllStudents = asyncHandler(async (req, res) => {
+  const students = await User.find({ role: "student" })
+    .select("-passwordHash")
+    .sort({ name: 1 });
+  res.json(students);
+});
+
+// GET /api/students/:id/registrations   (advisor) - fix #2: lets the advisor
+// see what a student is currently registered for, so they know what's
+// available to remove/drop. courseId is nested-populated so the UI can show
+// course code/title, not just a raw offeringId.
+const getStudentRegistrations = asyncHandler(async (req, res) => {
+  const student = await User.findById(req.params.id);
+  if (!student || student.role !== "student") {
+    return res.status(404).json({ message: "Student not found" });
+  }
+
+  const registrations = await Registration.find({
+    studentId: req.params.id,
+    status: "registered",
+  }).populate({ path: "offeringId", populate: { path: "courseId" } });
+
+  res.json(registrations);
+});
+
 // GET /api/students/:id/record   (advisor, or the student themself)
 const getStudentRecord = asyncHandler(async (req, res) => {
   // A student may only view their OWN record; an advisor may view any student's.
@@ -66,4 +94,11 @@ const getMyRecord = asyncHandler(async (req, res) => {
   return getStudentRecord(req, res);
 });
 
-module.exports = { getStudentRecord, getStudentEligible, getMyRegistrations, getMyRecord };
+module.exports = {
+  getAllStudents,
+  getStudentRegistrations,
+  getStudentRecord,
+  getStudentEligible,
+  getMyRegistrations,
+  getMyRecord,
+};
