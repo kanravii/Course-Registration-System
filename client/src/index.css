@@ -232,3 +232,64 @@ fieldset {
 .slot-row input:not([type='time']) {
   width: 90px;
 }
+
+.panel-section {
+  margin-top: 32px;
+}
+
+.panel-section h3 {
+  margin-bottom: 8px;
+}
+
+.student-picker select {
+  min-width: 300px;
+}
+
+.row-excluded td {
+  color: #98a2b3;
+  background: #f9fafb;
+}
+
+.row-excluded .reason {
+  color: #475467;
+}
+
+.row-retake td {
+  background: #fffaeb;
+}
+
+.row-failed td {
+  background: #fef3f2;
+}
+
+.badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 0.8rem;
+  font-weight: bold;
+}
+
+.badge-retake {
+  color: #b54708;
+  background: #fef0c7;
+  border: 1px solid #fedf89;
+}
+
+.badge-ok {
+  color: #067647;
+  background: #ecfdf3;
+}
+
+.reason {
+  font-style: italic;
+}
+
+.summary-line {
+  font-weight: bold;
+}
+
+.grade-f {
+  color: #b42318;
+  font-weight: bold;
+}
