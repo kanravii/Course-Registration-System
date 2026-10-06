@@ -6,9 +6,14 @@ import ConfirmDialog from './ConfirmDialog'
 import Modal from './Modal'
 import OfferingForm from './OfferingForm'
 import AddDropForm from './AddDropForm'
-import { useAuth } from '../context/AuthContext'
 import { useApiData } from '../hooks/useApiData'
-import { getOfferings, createOffering, updateOffering, deleteOffering } from '../services/api'
+import {
+  getOfferings,
+  createOffering,
+  updateOffering,
+  deleteOffering,
+  getInstructors,
+} from '../services/api'
 import { CURRENT_TERM } from '../config'
 import { formatDate } from '../utils/format'
 
@@ -24,7 +29,7 @@ function statusText(o) {
 }
 
 function OfferingsPanel() {
-  const { user: currentUser } = useAuth()
+  const { data: instructorList } = useApiData(getInstructors)
   const { data: offerings, error, reload } = useApiData(fetchOfferings)
 
   const [notice, setNotice] = useState('')
@@ -100,13 +105,8 @@ function OfferingsPanel() {
     reload()
   }
 
-  // Instructor choices: you, plus everyone already teaching an offering this term.
-  // (Advisors cannot list users, so this is the best we can do until the backend adds an endpoint.)
-  const instructorMap = { [currentUser.id]: { _id: currentUser.id, name: currentUser.name } }
-  for (const o of offerings ?? []) {
-    if (o.instructor?._id) instructorMap[o.instructor._id] = o.instructor
-  }
-  const instructors = Object.values(instructorMap).sort((a, b) => a.name.localeCompare(b.name))
+  // Instructor choices come from the backend (GET /api/instructors)
+  const instructors = instructorList ?? []
 
   const rows = offerings
     ? [...offerings].sort(

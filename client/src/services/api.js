@@ -76,6 +76,9 @@ export const deleteOffering = (id) => request(`/offerings/${id}`, { method: 'DEL
 // ---- Courses (advisor, admin) ----
 export const getCourses = () => request('/courses')
 
+// ---- Instructors (advisor, admin) ----
+export const getInstructors = () => request('/instructors')
+
 // ---- Students (advisor) ----
 export const getStudentRecord = (id) => request(`/students/${id}/record`)
 export const getStudentEligible = (id, term) =>
