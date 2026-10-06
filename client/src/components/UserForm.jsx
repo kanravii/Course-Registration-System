@@ -2,6 +2,7 @@ import { useState } from 'react'
 import ErrorMessage from './ErrorMessage'
 
 const ROLES = ['student', 'advisor', 'admin']
+const PROGRAMS = ['CS', 'IT']
 
 // Used for both "Create user" (user = null) and "Edit user" (user = the row being edited).
 // onSubmit must be an async function that throws if the save fails;
@@ -12,6 +13,9 @@ function UserForm({ user, advisors, onSubmit, onCancel }) {
   const [email, setEmail] = useState(user?.email ?? '')
   const [role, setRole] = useState(user?.role ?? 'student')
   const [studentId, setStudentId] = useState(user?.studentId ?? '')
+  const [program, setProgram] = useState(user?.program ?? '')
+  const [yearLevel, setYearLevel] = useState(user?.yearLevel ?? '')
+  const [employeeId, setEmployeeId] = useState(user?.employeeId ?? '')
   const [advisorId, setAdvisorId] = useState(user?.advisorId ?? '')
   const [password, setPassword] = useState('')
   const [active, setActive] = useState(user?.active ?? true)
@@ -27,7 +31,11 @@ function UserForm({ user, advisors, onSubmit, onCancel }) {
     if (isEdit) payload.active = active
     if (role === 'student') {
       payload.studentId = studentId.trim()
+      if (program) payload.program = program
+      if (yearLevel) payload.yearLevel = Number(yearLevel)
       payload.advisorId = advisorId || null
+    } else {
+      payload.employeeId = employeeId.trim()
     }
     if (password) payload.password = password // blank on edit = keep the current password
 
@@ -70,7 +78,7 @@ function UserForm({ user, advisors, onSubmit, onCancel }) {
         </select>
       </div>
 
-      {role === 'student' && (
+      {role === 'student' ? (
         <>
           <div className="form-field">
             <label htmlFor="user-student-id">Student ID</label>
@@ -79,6 +87,29 @@ function UserForm({ user, advisors, onSubmit, onCancel }) {
               value={studentId}
               onChange={(e) => setStudentId(e.target.value)}
               required
+            />
+          </div>
+
+          <div className="form-field">
+            <label htmlFor="user-program">Program</label>
+            <select id="user-program" value={program} onChange={(e) => setProgram(e.target.value)}>
+              <option value="">Not set</option>
+              {PROGRAMS.map((p) => (
+                <option key={p} value={p}>
+                  {p}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="form-field">
+            <label htmlFor="user-year">Year level</label>
+            <input
+              id="user-year"
+              type="number"
+              min="1"
+              value={yearLevel}
+              onChange={(e) => setYearLevel(e.target.value)}
             />
           </div>
 
@@ -98,6 +129,16 @@ function UserForm({ user, advisors, onSubmit, onCancel }) {
             </select>
           </div>
         </>
+      ) : (
+        <div className="form-field">
+          <label htmlFor="user-employee-id">Employee ID</label>
+          <input
+            id="user-employee-id"
+            value={employeeId}
+            onChange={(e) => setEmployeeId(e.target.value)}
+            required
+          />
+        </div>
       )}
 
       <div className="form-field">
