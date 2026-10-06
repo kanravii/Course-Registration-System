@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Navigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { ROLE_HOME } from '../utils/roles'
+import ErrorMessage from '../components/ErrorMessage'
 
 function LoginPage() {
   const { user, login } = useAuth()
@@ -31,11 +32,7 @@ function LoginPage() {
       <h1>Course Registration System</h1>
       <p>Sign in with your university account.</p>
 
-      {error && (
-        <div className="error-message" role="alert">
-          {error}
-        </div>
-      )}
+      {error && <ErrorMessage message={error} />}
 
       <form onSubmit={handleSubmit}>
         <div className="form-field">
