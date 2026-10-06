@@ -232,8 +232,8 @@ async function seed() {
           schedule: [
             {
               day: ["Mon", "Wed", "Fri"][index % 3],
-              startTime: `${9 + (index % 6)}:00`,
-              endTime: `${10 + (index % 6)}:00`,
+              startTime: `${String(9 + (index % 6)).padStart(2, "0")}:00`,
+              endTime: `${String(10 + (index % 6)).padStart(2, "0")}:00`,
               room: `${1 + (index % 2)}${2 + (index % 3)}0${1 + (index % 9)}`,
             },
           ],
