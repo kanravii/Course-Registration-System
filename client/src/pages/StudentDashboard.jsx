@@ -1,14 +1,18 @@
+import { useState } from 'react'
 import Navbar from '../components/Navbar'
 import AcademicRecord from '../components/AcademicRecord'
 import AddDropStatus from '../components/AddDropStatus'
 import DataSection from '../components/DataSection'
 import DataTable from '../components/DataTable'
 import ScheduleLines from '../components/ScheduleLines'
+import StudentAddDropPanel from '../components/StudentAddDropPanel'
 import { useAuth } from '../context/AuthContext'
 import { useApiData } from '../hooks/useApiData'
 import { CURRENT_TERM } from '../config'
-import { formatDate, roomsText } from '../utils/format'
+import { formatDate, isAddDropOpen, roomsText } from '../utils/format'
 import { getMe, getMyRecord, getMyRegistrations, getOfferings } from '../services/api'
+import AddDropRequest from '../components/AddDropRequest'
+import ErrorMessage from '../components/ErrorMessage'
 
 // Declared outside the component so useApiData gets the same function every render
 const fetchTermOfferings = () => getOfferings(CURRENT_TERM)
@@ -19,6 +23,7 @@ function StudentDashboard() {
   const registrationState = useApiData(getMyRegistrations)
   const offeringsState = useApiData(fetchTermOfferings)
   const recordState = useApiData(getMyRecord)
+  const [requestTarget, setRequestTarget] = useState(null) // the registration being requested
 
   // The registrations endpoint does not include the instructor's name,
   // so look it up from the term's offerings list.
@@ -44,7 +49,7 @@ function StudentDashboard() {
     {
       header: 'Add/Drop',
       render: (r) =>
-        r.offering?.status === 'open'
+        isAddDropOpen(r.offering)
           ? `Open until ${formatDate(r.offering.registrationClosesAt)}`
           : 'Closed',
     },
@@ -59,6 +64,12 @@ function StudentDashboard() {
           Student ID {user.studentId ?? '-'}
           {advisor ? ` | Advisor: ${advisor.name}` : ''}
         </p>
+        {profileState.error && (
+          <ErrorMessage
+            message={`Unable to load your advisor details. ${profileState.error.message}`}
+            onRetry={profileState.reload}
+          />
+        )}
 
         <DataSection
           title="Add/drop status"
@@ -68,6 +79,16 @@ function StudentDashboard() {
         >
           {(offerings) => <AddDropStatus offerings={offerings} />}
         </DataSection>
+
+        <section className="panel-section">
+          <h3>Request add/drop</h3>
+          <StudentAddDropPanel
+            offeringsState={offeringsState}
+            registrationState={registrationState}
+            term={CURRENT_TERM}
+            onRequest={setRequestTarget}
+          />
+        </section>
 
         <DataSection
           title={`My courses (${CURRENT_TERM})`}
@@ -93,6 +114,16 @@ function StudentDashboard() {
         >
           {(record) => <AcademicRecord record={record} />}
         </DataSection>
+
+        {requestTarget && (
+          <AddDropRequest
+            studentId={profileState.data?.studentId ?? user.studentId}
+            courseCode={requestTarget.offering?.course?.code}
+            section={requestTarget.offering?.section}
+            advisor={profileState.data?.advisorId}
+            onClose={() => setRequestTarget(null)}
+          />
+        )}
       </main>
     </>
   )

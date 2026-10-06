@@ -10,6 +10,18 @@ export function formatDate(value) {
   })
 }
 
+// Treat an open window whose closing date has passed as closed in the UI.
+// The API stores dates at midnight, so the closing date remains valid through
+// the end of that calendar day.
+export function isAddDropOpen(offering, now = new Date()) {
+  if (offering?.status !== 'open' || !offering.registrationClosesAt) return false
+
+  const dateText = String(offering.registrationClosesAt).slice(0, 10)
+  const [year, month, day] = dateText.split('-').map(Number)
+  const closesAt = Date.UTC(year, month - 1, day, 23, 59, 59, 999)
+  return Number.isFinite(closesAt) && closesAt >= now.getTime()
+}
+
 export function roomsText(schedule) {
   const rooms = [...new Set((schedule ?? []).map((s) => s.room).filter(Boolean))]
   return rooms.length ? rooms.join(', ') : '-'
