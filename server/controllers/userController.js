@@ -103,6 +103,13 @@ const deleteUser = asyncHandler(async (req, res) => {
   res.json({ message: "User deleted", id: req.params.id });
 });
 
+const getInstructors = asyncHandler(async (req, res) => {
+  const instructors = await User.find({ role: "advisor" })
+    .select("-passwordHash")
+    .sort({ name: 1 });
+  res.json(instructors);
+});
+
 // GET /api/me   (any authenticated role) - own profile, advisor populated.
 const getMe = asyncHandler(async (req, res) => {
   const user = await User.findById(req.user.id)
@@ -113,4 +120,4 @@ const getMe = asyncHandler(async (req, res) => {
   res.json(user);
 });
 
-module.exports = { getUsers, createUser, updateUser, deleteUser, getMe };
+module.exports = { getUsers, createUser, updateUser, deleteUser, getMe, getInstructors };

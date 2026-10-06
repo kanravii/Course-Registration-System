@@ -11,7 +11,8 @@ const offeringRoutes = require("./routes/offeringRoutes");
 const studentRoutes = require("./routes/studentRoutes");
 const registrationRoutes = require("./routes/registrationRoutes");
 const meRoutes = require("./routes/meRoutes");
-const courseRoutes = require("./routes/courseRoutes"); // fix #3
+const courseRoutes = require("./routes/courseRoutes");
+const instructorRoutes = require("./routes/instructorRoutes");
 
 const app = express();
 
@@ -30,7 +31,8 @@ app.use("/api/offerings", offeringRoutes);
 app.use("/api/students", studentRoutes);
 app.use("/api/registrations", registrationRoutes);
 app.use("/api/me", meRoutes);
-app.use("/api/courses", courseRoutes); // fix #3
+app.use("/api/courses", courseRoutes);
+app.use("/api/instructors", instructorRoutes);
 
 // Simple health check - useful for confirming the API is up
 app.get("/api/health", (req, res) => res.json({ status: "ok" }));
