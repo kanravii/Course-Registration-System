@@ -206,18 +206,28 @@ The seeded databased provide test accounts for each user role
 | Role | Email | Password |
 |---|---|---|
 | Admin | admin@example.com | ChangeMe123! |
+| Admin | - admin@university.edu | password123! |
 | Advisor | advisor@example.com | ChangeMe123! |
+| Advisor | advisor1@university.edu | password123 |
 | Student | 2600000001@students.stamford.edu | ChangeMe123! |
+| Student | 2600000015@students.stamford.edu  | ChangeMe123! |
 
 ## Dashboard Screenshots
 ### Admin Dashboard
 ![Admin Dashboard](docs/screenshots/Admin-dashboard.png)
+![Admin Dashboard](docs/screenshots/Admin2-dashboard.png)
+![Admin Dashboard](docs/screenshots/Admin3-dashboard.png)
 
 ### Advisor Dashboard
 ![Advisor Dashboard](docs/screenshots/Advisor-dashboard.png)
+![Advisor Dashboard](docs/screenshots/Advisor2-dashboard.png)
+![Advisor Dashboard](docs/screenshots/Advisor3-dashboard.png)
+![Advisor Dashboard](docs/screenshots/Advisor4-dashboard.png)
 
 ### Student Dashboard
 ![Student Dashboard](docs/screenshots/Student-dashboard.png)
+![Student Dashboard](docs/screenshots/Student2-dashboard.png)
+![Student Dashboard](docs/screenshots/Student3-dashboard.png)
 
 ## Feature Completion Status
 
