@@ -293,3 +293,21 @@ fieldset {
   color: #b42318;
   font-weight: bold;
 }
+
+.status-banner {
+  margin: 16px 0;
+  padding: 12px 16px;
+  border-radius: 6px;
+}
+
+.status-open {
+  color: #067647;
+  background: #ecfdf3;
+  border: 1px solid #75e0a7;
+}
+
+.status-closed {
+  color: #475467;
+  background: #f2f4f7;
+  border: 1px solid #d0d5dd;
+}

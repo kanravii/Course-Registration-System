@@ -94,3 +94,4 @@ export const deleteRegistration = (id) => request(`/registrations/${id}`, { meth
 // ---- Logged-in student ----
 export const getMyRegistrations = () => request('/me/registrations')
 export const getMyRecord = () => request('/me/record')
+export const getMe = () => request('/me')
