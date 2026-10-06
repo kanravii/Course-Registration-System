@@ -80,6 +80,8 @@ export const getCourses = () => request('/courses')
 export const getInstructors = () => request('/instructors')
 
 // ---- Students (advisor) ----
+export const getStudents = () => request('/students')
+export const getStudentRegistrations = (id) => request(`/students/${id}/registrations`)
 export const getStudentRecord = (id) => request(`/students/${id}/record`)
 export const getStudentEligible = (id, term) =>
   request(`/students/${id}/eligible?term=${encodeURIComponent(term)}`)
