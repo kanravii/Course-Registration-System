@@ -9,3 +9,24 @@ export function formatDate(value) {
     timeZone: 'UTC',
   })
 }
+
+export function roomsText(schedule) {
+  const rooms = [...new Set((schedule ?? []).map((s) => s.room).filter(Boolean))]
+  return rooms.length ? rooms.join(', ') : '-'
+}
+
+// Sorts terms like "1/2026" or "2026-1" from oldest to newest
+function termKey(term) {
+  let m = /^(\d)\/(\d{4})$/.exec(term)
+  if (m) return Number(m[2]) * 10 + Number(m[1])
+  m = /^(\d{4})-(\d)$/.exec(term)
+  if (m) return Number(m[1]) * 10 + Number(m[2])
+  return null
+}
+
+export function compareTerms(a, b) {
+  const ka = termKey(a)
+  const kb = termKey(b)
+  if (ka !== null && kb !== null) return ka - kb
+  return a.localeCompare(b)
+}

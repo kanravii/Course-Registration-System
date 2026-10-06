@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import Navbar from '../components/Navbar'
 import OfferingsPanel from '../components/OfferingsPanel'
+import StudentRegistrationPanel from '../components/StudentRegistrationPanel'
 
 function AdvisorDashboard() {
   const [tab, setTab] = useState('offerings')
@@ -29,7 +30,7 @@ function AdvisorDashboard() {
         </div>
 
         {tab === 'offerings' && <OfferingsPanel />}
-        {tab === 'registration' && <p>Student registration coming soon.</p>}
+        {tab === 'registration' && <StudentRegistrationPanel />}
       </main>
     </>
   )
