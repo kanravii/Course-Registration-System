@@ -187,3 +187,48 @@ button.danger:disabled {
   color: #475467;
   font-size: 0.9rem;
 }
+
+.page-wide {
+  max-width: 1200px;
+}
+
+.tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+  border-bottom: 1px solid #d0d5dd;
+}
+
+.tab {
+  background: none;
+  border: none;
+  border-bottom: 3px solid transparent;
+  border-radius: 0;
+}
+
+.tab.active {
+  font-weight: bold;
+  border-bottom-color: #1f3a5f;
+}
+
+fieldset {
+  margin: 0 0 16px;
+  padding: 12px;
+  border: 1px solid #d0d5dd;
+  border-radius: 4px;
+}
+
+.slot-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.slot-row input[type='time'] {
+  width: 110px;
+}
+
+.slot-row input:not([type='time']) {
+  width: 90px;
+}

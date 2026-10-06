@@ -87,7 +87,7 @@ function AdminDashboard() {
     { header: 'Name', render: (u) => u.name },
     { header: 'Email', render: (u) => u.email },
     { header: 'Role', render: (u) => u.role },
-    { header: 'Student ID', render: (u) => u.studentId || '-' },
+    { header: 'ID', render: (u) => u.studentId || u.employeeId || '-' },
     { header: 'Advisor', render: (u) => userById[u.advisorId]?.name || '-' },
     { header: 'Status', render: (u) => (u.active ? 'Active' : 'Inactive') },
     {

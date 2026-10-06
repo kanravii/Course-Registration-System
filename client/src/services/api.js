@@ -73,6 +73,9 @@ export const updateOffering = (id, data) =>
   request(`/offerings/${id}`, { method: 'PATCH', body: data })
 export const deleteOffering = (id) => request(`/offerings/${id}`, { method: 'DELETE' })
 
+// ---- Courses (advisor, admin) ----
+export const getCourses = () => request('/courses')
+
 // ---- Students (advisor) ----
 export const getStudentRecord = (id) => request(`/students/${id}/record`)
 export const getStudentEligible = (id, term) =>
