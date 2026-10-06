@@ -8,8 +8,16 @@ const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
 const STATUSES = ['draft', 'open', 'closed', 'cancelled']
 const EMPTY_SLOT = { day: 'Mon', startTime: '', endTime: '', room: '' }
 
-// Dates arrive as ISO strings; <input type="date"> wants YYYY-MM-DD
+// Dates arrive as ISO strings; <input type="date"> wants YYYY-MM-DD.
 const toDateInput = (value) => (value ? value.slice(0, 10) : '')
+
+// The API validates times as HH:MM. Older seeded records may contain 9:00,
+// so normalize both existing values and newly submitted values at the UI edge.
+const toTimeInput = (value) => {
+  if (!value) return ''
+  const [hours, minutes] = value.split(':')
+  return `${hours.padStart(2, '0')}:${minutes ?? '00'}`
+}
 
 // Loads the course catalog and shows it as a dropdown (only used when creating)
 function CourseSelect({ value, onChange }) {
@@ -44,7 +52,13 @@ function OfferingForm({ offering, term, instructors, onSubmit, onCancel }) {
   const [opensAt, setOpensAt] = useState(toDateInput(offering?.registrationOpensAt))
   const [closesAt, setClosesAt] = useState(toDateInput(offering?.registrationClosesAt))
   const [schedule, setSchedule] = useState(
-    offering?.schedule?.length ? offering.schedule.map((s) => ({ ...s })) : [{ ...EMPTY_SLOT }],
+    offering?.schedule?.length
+      ? offering.schedule.map((s) => ({
+          ...s,
+          startTime: toTimeInput(s.startTime),
+          endTime: toTimeInput(s.endTime),
+        }))
+      : [{ ...EMPTY_SLOT }],
   )
   const [error, setError] = useState('')
   const [submitting, setSubmitting] = useState(false)
@@ -91,7 +105,12 @@ function OfferingForm({ offering, term, instructors, onSubmit, onCancel }) {
       status,
       registrationOpensAt: opensAt,
       registrationClosesAt: closesAt,
-      schedule: schedule.map((s) => ({ ...s, room: s.room.trim() })),
+      schedule: schedule.map((s) => ({
+        ...s,
+        startTime: toTimeInput(s.startTime),
+        endTime: toTimeInput(s.endTime),
+        room: s.room.trim(),
+      })),
     }
     if (!isEdit) {
       payload.course = course

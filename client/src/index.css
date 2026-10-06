@@ -311,3 +311,56 @@ fieldset {
   background: #f2f4f7;
   border: 1px solid #d0d5dd;
 }
+
+.instructions li {
+  margin-bottom: 8px;
+}
+
+.subject-line {
+  margin-top: 6px;
+  padding: 6px 10px;
+  font-family: monospace;
+  background: #f2f4f7;
+  border: 1px solid #d0d5dd;
+  border-radius: 4px;
+}
+
+.add-drop-panel {
+  padding: 16px;
+  background: #fff;
+  border: 1px solid #d0d5dd;
+  border-radius: 6px;
+}
+
+.add-drop-list {
+  display: grid;
+  gap: 10px;
+}
+
+.add-drop-course {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  padding: 12px;
+  border: 1px solid #eaecf0;
+  border-radius: 4px;
+}
+
+.add-drop-open {
+  color: #067647;
+  font-size: 0.9rem;
+  font-weight: bold;
+}
+
+.add-drop-closed {
+  color: #667085;
+  font-size: 0.9rem;
+}
+
+@media (max-width: 640px) {
+  .add-drop-course {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}

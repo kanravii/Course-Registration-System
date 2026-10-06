@@ -15,7 +15,7 @@ import {
   getInstructors,
 } from '../services/api'
 import { CURRENT_TERM } from '../config'
-import { formatDate } from '../utils/format'
+import { formatDate, isAddDropOpen } from '../utils/format'
 
 // Defined outside the component so it is the same function on every render
 // (useApiData needs a stable function).
@@ -24,12 +24,17 @@ const fetchOfferings = () => getOfferings(CURRENT_TERM)
 const labelOf = (o) => `${o.course?.code ?? 'Course'} Section ${o.section}`
 
 function statusText(o) {
-  if (o.status === 'open') return `Open until ${formatDate(o.registrationClosesAt)}`
+  if (isAddDropOpen(o)) return `Open until ${formatDate(o.registrationClosesAt)}`
+  if (o.status === 'open') return `Closed (ended ${formatDate(o.registrationClosesAt)})`
   return o.status.charAt(0).toUpperCase() + o.status.slice(1)
 }
 
 function OfferingsPanel() {
-  const { data: instructorList } = useApiData(getInstructors)
+  const {
+    data: instructorList,
+    error: instructorError,
+    reload: reloadInstructors,
+  } = useApiData(getInstructors)
   const { data: offerings, error, reload } = useApiData(fetchOfferings)
 
   const [notice, setNotice] = useState('')
@@ -149,7 +154,7 @@ function OfferingsPanel() {
       render: (o) => (
         <>
           <button onClick={() => openEdit(o)}>Edit</button>
-          {o.status === 'open' ? (
+          {isAddDropOpen(o) ? (
             <button onClick={() => askCloseAddDrop(o)}>Close add/drop</button>
           ) : (
             <button onClick={() => askOpenAddDrop(o)}>Open add/drop</button>
@@ -206,13 +211,32 @@ function OfferingsPanel() {
 
       {showForm && (
         <Modal title={editingOffering ? 'Edit offering' : 'Create offering'}>
-          <OfferingForm
-            offering={editingOffering}
-            term={CURRENT_TERM}
-            instructors={instructors}
-            onSubmit={handleSave}
-            onCancel={closeForm}
-          />
+          {instructorError ? (
+            <ErrorMessage
+              message={`Unable to load instructor accounts. ${instructorError.message}`}
+              onRetry={reloadInstructors}
+            />
+          ) : !instructorList ? (
+            <LoadingMessage text="Loading instructor accounts..." />
+          ) : instructors.length === 0 ? (
+            <>
+              <p className="empty-message">
+                No instructor accounts are available. An administrator must create or activate an
+                account with the Advisor role before an instructor can be assigned.
+              </p>
+              <div className="button-row">
+                <button type="button" onClick={closeForm}>Close</button>
+              </div>
+            </>
+          ) : (
+            <OfferingForm
+              offering={editingOffering}
+              term={CURRENT_TERM}
+              instructors={instructors}
+              onSubmit={handleSave}
+              onCancel={closeForm}
+            />
+          )}
         </Modal>
       )}
 
