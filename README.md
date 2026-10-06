@@ -111,6 +111,18 @@ Course-Registration-System/
 │   └── package-lock.json
 │
 ├── docs/
+|   ├── screenshots
+|   |   ├── Admin-dashboard.png
+|   |   ├── Admin2-dashboard.png
+|   |   ├── Admin3-dashboard.png
+|   |   ├── Advisor-dashboard.png
+|   |   ├── Advisor2-dashboard.png
+|   |   ├── Advisor3-dashboard.png
+|   |   ├── Advisor4-dashboard.png
+|   |   ├── Student-dashboard.png
+|   |   ├── Student2-dashboard.png
+|   |   └── Student3-dashboard.png
+|   |
 |   ├── data-model.md
 |   ├── database-design-diagram.md
 │   └── data-model.md
