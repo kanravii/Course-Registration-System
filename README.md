@@ -223,7 +223,7 @@ The seeded databased provide test accounts for each user role
 | Role | Email | Password |
 |---|---|---|
 | Admin | admin@example.com | ChangeMe123! |
-| Admin | - admin@university.edu | password123! |
+| Admin | admin@university.edu | password123! |
 | Advisor | advisor@example.com | ChangeMe123! |
 | Advisor | advisor1@university.edu | password123 |
 | Student | 2600000001@students.stamford.edu | ChangeMe123! |
