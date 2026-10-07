@@ -160,11 +160,16 @@ See `docs/data-model.md` for relationships, required fields, and invariants.
 
 ## Setup and Installation
 
-- Clone the repository and install dependencies for both the backend and frontend
+- Clone the repository, check the state, and install dependencies for both the backend and frontend
 
 ```
     git clone <repository-url>
     cd Course-Registration-System
+
+    git status 
+    git branch -a 
+    git remote -v 
+    git log --oneline -10 
 
     cd server
     npm install
